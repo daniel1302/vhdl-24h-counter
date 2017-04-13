@@ -7,9 +7,9 @@ entity counter is
 	 Generic (DELAY: Time := 5ns);
 	 
     Port ( clk : in  STD_LOGIC;
-        --   plusH : in  STD_LOGIC;
+           plusH : in  STD_LOGIC;
            plusM : in  STD_LOGIC;
-         --  hour : out  STD_LOGIC_VECTOR (4 downto 0);
+           hour : out  STD_LOGIC_VECTOR (4 downto 0);
            minute : out  STD_LOGIC_VECTOR (5 downto 0);
            second : out  STD_LOGIC_VECTOR (5 downto 0);
 			  dump : out  STD_LOGIC_VECTOR (1 downto 0)
@@ -21,6 +21,9 @@ architecture Behavioral of counter is
 	signal addHourFlag, addMinuteFlag: STD_LOGIC_VECTOR (1 downto 0) := "00";
 begin
 	
+	-----
+	-- Minute increments
+	-----
 	process (clk, plusM) 
 	begin
 		if (plusM = '1' and addMinuteFlag(0) = '0') then
@@ -34,11 +37,38 @@ begin
 		end if;
 	end process;
 
+	-----
+	-- Hours increments
+	-----
+	process (clk, plusH) 
+	begin
+		if (plusH = '1' and addHourFlag(0) = '0') then
+			addHourFlag(1) <= '1'; -- Można inkrementować
+			addHourFlag(0) <= '1'; -- Blokuj kolejną inkrementację		
+		elsif (plusH = '1' and 	addHourFlag(1) = '1') then
+			addHourFlag(1) <= '0'; -- zablokuj zbyt szybką inkrementację
+		elsif (plusH = '0' and addHourFlag(0) = '1') then
+			addHourFlag(0) <= '0';
+			addHourFlag(1) <= '0';
+		end if;
+	end process;
+	
+	-----
+	-- Main process
+	-----
 	process (clk)		
 	begin			
 		if (clk'event and clk = '1') then
-					
-					
+
+			if ((minuteInt = 59 and secondInt = 59) or addHourFlag(1) = '1') then
+				if (hourInt = 23) then 
+					hourInt <= 0;
+				else
+					hourInt <= hourInt + 1;
+				end if;
+			end if;
+				
+				
 			if (secondInt = 59 or addMinuteFlag(1) = '1') then
 				if (minuteInt = 59) then 
 					minuteInt <= 0;
@@ -54,19 +84,16 @@ begin
 				secondInt <= secondInt + 1;
 			end if;
 			
-			
-			
-			
 		end if;
 		dump <= addMinuteFlag;
 			
 	
-	end process;
+	end process;	
 	
 	
 	
 	second <= conv_std_logic_vector(secondInt, 6);
 	minute <= conv_std_logic_vector(minuteInt, 6);
- 	--hour   <= conv_std_logic_vector(hourInt, 5);
+ 	hour   <= conv_std_logic_vector(hourInt, 5);
 
 end Behavioral;
