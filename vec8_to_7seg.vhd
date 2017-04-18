@@ -17,13 +17,13 @@ architecture Behavioral of vec8_to_7seg is
 			when 0	=> return "00111111";
 			when 1	=> return "00000110";
 			when 2   => return "01011011";
-			--when "0011" => return "01001111";
-			--when "0100" => return "01100110";
-			--when "0101" => return "01101101";
-			--when "0110" => return "01111101";
-			--when "0111" => return "00000111";
-			--when "1000" => return "01111111";
-			--when "1001" => return "01101111";
+			when 3 => return "01001111";
+			when 4 => return "01100110";
+			when 5 => return "01101101";
+			when 6 => return "01111101";
+			when 7 => return "00000111";
+			when 8 => return "01111111";
+			when 9 => return "01101111";
 			when others => return "01000000";
 		end case;		
 	end to7seg;
@@ -63,10 +63,8 @@ architecture Behavioral of vec8_to_7seg is
 	signal help: integer range 0 to 99 := 0;
 begin
 	help <= conv_integer( unsigned(vector_in));
-
 	
-	
-	--hex1_out <= "11101100";
+	hex1_out <= conv_std_logic_vector(div_f(help, 10), 8);
 	hex2_out <= conv_std_logic_vector(mod_f(help, 10), 8);
 end Behavioral;
 
